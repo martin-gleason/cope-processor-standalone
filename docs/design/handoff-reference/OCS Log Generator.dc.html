@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="stylesheet" href="ocs-theme.css">
+<style>
+  *{box-sizing:border-box}
+  html{font-size:100%}
+  body{margin:0;font-family:var(--ocs-font-body);background:var(--ocs-page-bg);color:var(--ocs-text-primary);-webkit-text-size-adjust:100%;line-height:1.5}
+  a{color:var(--ocs-navy)}
+  a:hover{color:var(--ocs-navy-soft)}
+  :focus-visible{outline:var(--ocs-focus-ring);outline-offset:2px}
+  button{font-family:inherit;cursor:pointer}
+  input,select{font-family:inherit}
+  table{border-collapse:collapse}
+  @keyframes ocsIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+</style>
+</helmet>
+
+<div style="min-height:100vh;display:flex;flex-direction:column">
+
+  <!-- ============ HEADER ============ -->
+  <header style="background:var(--ocs-sb-bg);color:var(--ocs-sb-text);border-bottom:1px solid var(--ocs-sb-border)">
+    <div style="max-width:1180px;margin:0 auto;padding:0.75rem 1.25rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:0.75rem;flex:1 1 auto;min-width:0">
+        <div aria-hidden="true" style="width:2.5rem;height:2.5rem;border-radius:8px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.22);display:flex;align-items:center;justify-content:center;flex:none;font-family:var(--ocs-font-display);font-weight:700;font-size:0.95rem;letter-spacing:0.02em;color:#fff">OCS</div>
+        <div style="min-width:0">
+          <div style="font-family:var(--ocs-font-display);font-weight:600;font-size:1.02rem;line-height:1.2">Training Log Generator</div>
+          <div style="font-size:0.78rem;color:var(--ocs-sb-text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Office of Career Services · Cook County Juvenile Probation &amp; Court Services</div>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:0.5rem;flex:none">
+        <!-- Font size stepper -->
+        <div role="group" aria-label="Text size" style="display:flex;align-items:center;gap:0.35rem;background:rgba(255,255,255,0.10);border:1px solid rgba(255,255,255,0.18);border-radius:var(--ocs-radius-md);padding:0.2rem 0.35rem">
+          <span aria-hidden="true" style="font-size:0.72rem;color:var(--ocs-sb-text-muted);padding:0 0.15rem">Text</span>
+          <sc-for list="{{ fontButtons }}" as="fb" hint-placeholder-count="3">
+            <button type="button" onClick="{{ fb.onClick }}" aria-pressed="{{ fb.pressed }}" aria-label="{{ fb.aria }}" title="{{ fb.aria }}" style="border:1px solid {{ fb.border }};background:{{ fb.bg }};color:{{ fb.fg }};border-radius:6px;padding:0.15rem 0.45rem;font-weight:700;line-height:1;font-size:{{ fb.size }}">A</button>
+          </sc-for>
+        </div>
+
+        <!-- Dark mode toggle -->
+        <button type="button" onClick="{{ toggleTheme }}" aria-pressed="{{ themePressed }}" style="display:flex;align-items:center;gap:0.4rem;border:1px solid rgba(255,255,255,0.18);background:rgba(255,255,255,0.10);color:var(--ocs-sb-text);border-radius:var(--ocs-radius-md);padding:0.35rem 0.6rem;font-size:0.82rem;font-weight:600">
+          <span aria-hidden="true" style="font-size:0.95rem">{{ themeIcon }}</span><span>{{ themeLabel }}</span>
+        </button>
+
+        <!-- Help -->
+        <button type="button" onClick="{{ openHelp }}" style="display:flex;align-items:center;gap:0.4rem;border:1px solid rgba(255,255,255,0.18);background:rgba(255,255,255,0.10);color:var(--ocs-sb-text);border-radius:var(--ocs-radius-md);padding:0.35rem 0.6rem;font-size:0.82rem;font-weight:600">
+          <span aria-hidden="true">?</span><span>Help</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Secondary nav (after load) -->
+    <sc-if value="{{ loaded }}" hint-placeholder-val="{{ false }}">
+      <nav aria-label="Sections" style="background:var(--ocs-sb-bg-hover);border-top:1px solid var(--ocs-sb-border)">
+        <div style="max-width:1180px;margin:0 auto;padding:0 1.25rem;display:flex;gap:0.25rem">
+          <sc-for list="{{ navTabs }}" as="t" hint-placeholder-count="3">
+            <button type="button" onClick="{{ t.onClick }}" aria-current="{{ t.current }}" style="background:transparent;border:none;border-bottom:3px solid {{ t.border }};color:{{ t.fg }};font-weight:600;font-size:0.88rem;padding:0.7rem 0.9rem">{{ t.label }}</button>
+          </sc-for>
+        </div>
+      </nav>
+    </sc-if>
+  </header>
+
+  <!-- ============ MAIN ============ -->
+  <main style="flex:1 1 auto;width:100%;max-width:1180px;margin:0 auto;padding:1.5rem 1.25rem 3rem">
+
+    <!-- ---------- LANDING ---------- -->
+    <sc-if value="{{ isLanding }}" hint-placeholder-val="{{ true }}">
+      <div style="animation:ocsIn 0.25s ease">
+        <div style="max-width:720px;margin:0 auto 1.25rem;text-align:center">
+          <h1 style="font-family:var(--ocs-font-display);font-size:1.6rem;margin:0.5rem 0 0.5rem;color:var(--ocs-text-primary)">Turn Forms responses into AOIC training logs</h1>
+          <p style="font-size:1rem;color:var(--ocs-text-secondary);margin:0 auto;max-width:52ch">Drop your Microsoft Forms export below. This tool reads each staff member’s submitted sessions, checks them against your ledger, and generates the AOIC log file for each new one — locally, on this computer.</p>
+        </div>
+
+        <!-- Drop zone -->
+        <div role="button" tabindex="0" aria-label="Upload files: drag and drop the form responses file here, or press Enter to browse"
+             onClick="{{ openPicker }}" onKeyDown="{{ onDropZoneKey }}" onDragOver="{{ onDragOver }}" onDragLeave="{{ onDragLeave }}" onDrop="{{ onDrop }}"
+             style="max-width:720px;margin:0 auto;background:var(--ocs-card-bg);border:2px dashed {{ dropBorder }};border-radius:var(--ocs-radius-lg);padding:2.5rem 1.5rem;text-align:center;box-shadow:0 1px 3px var(--ocs-shadow-card);transition:border-color .15s,background .15s">
+          <div aria-hidden="true" style="width:3.5rem;height:3.5rem;margin:0 auto 1rem;border-radius:12px;background:var(--ocs-code-bg);display:flex;align-items:center;justify-content:center">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--ocs-navy)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4"/><path d="M6 10l6-6 6 6"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+          </div>
+          <div style="font-size:1.1rem;font-weight:600;margin-bottom:0.35rem">Drag the form responses file here</div>
+          <div style="font-size:0.95rem;color:var(--ocs-text-secondary);margin-bottom:1.1rem">Add the ledger file too, if you have one. Accepts .xlsx and .csv.</div>
+          <button type="button" onClick="{{ openPickerStop }}" style="background:var(--ocs-btn-bg);color:var(--ocs-on-accent);border:none;border-radius:var(--ocs-radius-md);padding:0.6rem 1.1rem;font-weight:600;font-size:0.95rem;box-shadow:0 1px 2px var(--ocs-shadow-btn)">Browse files…</button>
+          <input type="file" multiple accept=".xlsx,.csv" ref="{{ setFileRef }}" onChange="{{ onFiles }}" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);border:0" />
+          <div style="margin-top:1.1rem;font-size:0.8rem;color:var(--ocs-text-muted)">Files never leave this computer. Nothing is uploaded.</div>
+        </div>
+
+        <div style="max-width:720px;margin:1rem auto 0;display:flex;justify-content:center">
+          <button type="button" onClick="{{ loadSample }}" style="background:transparent;border:1px solid var(--ocs-border);color:var(--ocs-text-secondary);border-radius:var(--ocs-radius-md);padding:0.5rem 0.9rem;font-size:0.85rem;font-weight:600">Load sample data to explore</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ---------- SUMMARY ---------- -->
+    <sc-if value="{{ isSummary }}" hint-placeholder-val="{{ false }}">
+      <div style="animation:ocsIn 0.25s ease">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;margin-bottom:1rem">
+          <h1 style="font-family:var(--ocs-font-display);font-size:1.35rem;margin:0">Ready to process</h1>
+          <span style="font-size:0.85rem;color:var(--ocs-text-muted)">From <span style="font-family:var(--ocs-font-mono)">responses_2026.xlsx</span></span>
+        </div>
+
+        <!-- Summary strip -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:0.85rem;margin-bottom:1.5rem">
+          <div style="background:var(--ocs-card-bg);border:1px solid var(--ocs-border);border-radius:var(--ocs-radius-lg);padding:1rem 1.1rem;box-shadow:0 1px 3px var(--ocs-shadow-card)">
+            <div style="font-size:1.9rem;font-weight:700;font-family:var(--ocs-font-display);line-height:1">{{ summary.found }}</div>
+            <div style="font-size:0.85rem;color:var(--ocs-text-secondary);margin-top:0.2rem">submissions found</div>
+          </div>
+          <div style="background:var(--ocs-card-bg);border:1px solid var(--ocs-border);border-radius:var(--ocs-radius-lg);padding:1rem 1.1rem;box-shadow:0 1px 3px var(--ocs-shadow-card)">
+            <div style="display:flex;align-items:center;gap:0.4rem"><span aria-hidden="true" style="color:var(--ocs-accent);font-size:1rem">●</span><span style="font-size:1.9rem;font-weight:700;font-family:var(--ocs-font-display);line-height:1">{{ summary.new }}</span></div>
+            <div style="font-size:0.85rem;color:var(--ocs-text-secondary);margin-top:0.2rem">new (not yet generated)</div>
+          </div>
+          <div style="background:var(--ocs-card-bg);border:1px solid var(--ocs-border);border-radius:var(--ocs-radius-lg);padding:1rem 1.1rem;box-shadow:0 1px 3px var(--ocs-shadow-card)">
+            <div style="display:flex;align-items:center;gap:0.4rem"><span aria-hidden="true" style="color:var(--ocs-status-good);font-size:1rem">✓</span><span style="font-size:1.9rem;font-weight:700;font-family:var(--ocs-font-display);line-height:1">{{ summary.generated }}</span></div>
+            <div style="font-size:0.85rem;color:var(--ocs-text-secondary);margin-top:0.2rem">already generated</div>
+          </div>
+          <div style="background:var(--ocs-card-bg);border:1px solid var(--ocs-border);border-radius:var(--ocs-radius-lg);padding:1rem 1.1rem;box-shadow:0 1px 3px var(--ocs-shadow-card)">
+            <div style="display:flex;align-items:center;gap:0.4rem"><span aria-hidden="true" style="color:var(--ocs-status-warn);font-size:1rem">⚠</span><span style="font-size:1.9rem;font-weight:700;font-family:var(--ocs-font-display);line-height:1">{{ summary.warnings }}</span></div>
+            <div style="font-size:0.85rem;color:var(--ocs-text-secondary);margin-top:0.2rem">with warnings</div>
+          </div>
+        </div>
+
+        <!-- Initials prompt -->
+        <div style="background:var(--ocs-code-bg);border:1px solid var(--ocs-border);border-radius:var(--ocs-radius-lg);padding:1rem 1.1rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:0.85rem;flex-wrap:wrap">
+          <label for="ocs-initials" style="font-weight:600;font-size:0.92rem">Your initials</label>
+          <input id="ocs-initials" type="text" value="{{ initials }}" onInput="{{ onInitials }}" maxlength="4" placeholder="e.g. MG" aria-describedby="ocs-initials-help"
+                 style="width:6rem;text-transform:uppercase;background:var(--ocs-card-bg);border:1px solid var(--ocs-border-hover);border-radius:var(--ocs-radius-md);padding:0.5rem 0.6rem;font-size:1rem;font-weight:700;letter-spacing:0.05em;color:var(--ocs-text-primary)" />
+          <span id="ocs-initials-help" style="font-size:0.82rem;color:var(--ocs-text-muted)">Stamped on every log you generate, so runs are traceable.</span>
+        </div>
+
+        <!-- Two paths -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem">
+          <div style="background:var(--ocs-card-bg);border:1px solid var(--ocs-border);border-radius:var(--ocs-radius-lg);padding:1.35rem;box-shadow:0 1px 3px var(--ocs-shadow-card);display:flex;flex-direction:column">
+            <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem"><span aria-hidden="true" style="font-size:1.2rem">⚡</span><h2 style="font-family:var(--ocs-font-display);font-size:1.1rem;margin:0">Generate all new logs</h2><span style="font-size:0.72rem;font-weight:700;background:var(--ocs-accent-fill);color:var(--ocs-on-accent);border-radius:999px;padding:0.1rem 0.5rem">QUICK</span></div>
+            <p style="font-size:0.92rem;color:var(--ocs-text-secondary);margin:0 0 1rem;flex:1">Create a log for every one of the <strong>{{ summary.new }}</strong> new submissions in one step. Already-generated ones are skipped. You can still review the ledger afterward.</p>
+            <button type="button" onClick="{{ generateAll }}" disabled="{{ genDisabled }}" style="background:{{ genBg }};color:var(--ocs-on-accent);border:none;border-radius:var(--ocs-radius-md);padding:0.7rem 1rem;font-weight:600;font-size:0.98rem;opacity:{{ genOpacity }}">Generate {{ summary.new }} logs</button>
+            <sc-if value="{{ genDisabled }}" hint-placeholder-val="{{ false }}"><span style="font-size:0.78rem;color:var(--ocs-status-warn);margin-top:0.5rem">⚠ Enter your initials above first.</span></sc-if>
+          </div>
+
+          <div style="background:var(--ocs-card-bg);border:1px solid var(--ocs-border);border-radius:var(--ocs-radius-lg);padding:1.35rem;box-shadow:0 1px 3px var(--ocs-shadow-card);display:flex;flex-direction:column">
+            <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem"><span aria-hidden="true" style="font-size:1.2rem">☑</span><h2 style="font-family:var(--ocs-font-display);font-size:1.1rem;margin:0">Preview &amp; choose</h2></div>
+            <p style="font-size:0.92rem;color:var(--ocs-text-secondary);margin:0 0 1rem;flex:1">Open the full table, resolve any warnings, and pick exactly which submissions to generate. Best when something needs a second look.</p>
+            <button type="button" onClick="{{ goPreview }}" style="background:transparent;color:var(--ocs-accent);border:1.5px solid var(--ocs-accent);border-radius:var(--ocs-radius-md);padding:0.7rem 1rem;font-weight:600;font-size:0.98rem">Open preview table</button>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ---------- PREVIEW TABLE ---------- -->
+    <sc-if value="{{ isPreview }}" hint-placeholder-val="{{ false }}">
+      <div style="animation:ocsIn 0.25s ease">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.85rem">
+          <h1 style="font-family:var(--ocs-font-display);font-size:1.35rem;margin:0">Preview submissions</h1>
+          <span style="font-size:0.85rem;color:var(--ocs-text-muted)">Newest first · {{ rowCount }} shown</span>
+        </div>
+
+        <!-- Filters -->
+        <div style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:flex-end;margin-bottom:0.85rem">
+          <div style="display:flex;flex-direction:column;gap:0.25rem">
+            <label for="f-person" style="font-size:0.78rem;font-weight:600;color:var(--ocs-text-secondary)">Person</label>
+            <select id="f-person" value="{{ filterPerson }}" onChange="{{ onFilterPerson }}" style="background:var(--ocs-card-bg);border:1px solid var(--ocs-border-hover);border-radius:var(--ocs-radius-md);padding:0.5rem 0.6rem;font-size:0.9rem;color:var(--ocs-text-primary);min-width:12rem">
+              <sc-for list="{{ peopleOptions }}" as="p" hint-placeholder-count="4"><option value="{{ p.value }}">{{ p.label }}</option></sc-for>
+            </select>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:0.25rem">
+            <label for="f-status" style="font-size:0.78rem;font-weight:600;color:var(--ocs-text-secondary)">Status</label>
+            <select id="f-status" value="{{ filterStatus }}" onChange="{{ onFilterStatus }}" style="background:var(--ocs-card-bg);border:1px solid var(--ocs-border-hover);border-radius:var(--ocs-radius-md);padding:0.5rem 0.6rem;font-size:0.9rem;color:var(--ocs-text-primary);min-width:11rem">
+              <option value="all">All statuses</option>
+              <option value="new">New only</option>
+              <option value="generated">Already generated</option>
+            </select>
+          </div>
+          <div style="flex:1"></div>
+          <button type="button" onClick="{{ generateSelected }}" disabled="{{ selDisabled }}" style="background:{{ selBg }};color:var(--ocs-on-accent);border:none;border-radius:var(--ocs-radius-md);padding:0.6rem 1rem;font-weight:600;font-size:0.92rem;opacity:{{ selOpacity }}">Generate selected ({{ selectedCount }})</button>
+        </div>
+
+        <div style="background:var(--ocs-card-bg);border:1px solid var(--ocs-border);border-radius:var(--ocs-radius-lg);box-shadow:0 1px 3px var(--ocs-shadow-card);overflow:auto">
+          <table style="width:100%;font-size:0.92rem;min-width:820px">
+            <thead>
+              <tr style="background:var(--ocs-code-bg);text-align:left">
+                <th style="padding:0.8rem 0.75rem;width:2.5rem"><input type="checkbox" checked="{{ allChecked }}" onChange="{{ toggleAll }}" aria-label="Select all shown rows" style="width:1.1rem;height:1.1rem" /></th>
+                <th style="padding:0.8rem 0.75rem;font-weight:700">Person</th>
+                <th style="padding:0.8rem 0.75rem;font-weight:700">Conference / Label</th>
+                <th style="padding:0.8rem 0.75rem;font-weight:700;white-space:nowrap">Date(s)</th>
+                <th style="padding:0.8rem 0.75rem;font-weight:700;text-align:center">Sessions</th>
+                <th style="padding:0.8rem 0.75rem;font-weight:700;text-align:right;white-space:nowrap">Hours</th>
+                <th style="padding:0.8rem 0.75rem;font-weight:700">Status</th>
+                <th style="padding:0.8rem 0.75rem;font-weight:700">Warnings</th>
+              </tr>
+            </thead>
+            <sc-for list="{{ rows }}" as="r" hint-placeholder-count="6">
+              <tbody style="border-top:1px solid var(--ocs-border)">
+                <tr style="background:{{ r.rowBg }}">
+                  <td style="padding:0.85rem 0.75rem;vertical-align:top"><input type="checkbox" checked="{{ r.checked }}" onChange="{{ r.onToggle }}" aria-label="{{ r.selectAria }}" style="width:1.1rem;height:1.1rem" /></td>
+                  <td style="padding:0.85rem 0.75rem;vertical-align:top;font-weight:600;white-space:nowrap">{{ r.person }}</td>
+                  <td style="padding:0.85rem 0.75rem;vertical-align:top;max-width:26rem">{{ r.label }}</td>
+                  <td style="padding:0.85rem 0.75rem;vertical-align:top;white-space:nowrap;font-family:var(--ocs-font-mono);font-size:0.85rem;color:var(--ocs-text-secondary)">{{ r.dates }}</td>
+                  <td style="padding:0.85rem 0.75rem;vertical-align:top;text-align:center">{{ r.sessionCount }}</td>
+                  <td style="padding:0.85rem 0.75rem;vertical-align:top;text-align:right;font-weight:600;white-space:nowrap">{{ r.hours }}</td>
+                  <td style="padding:0.85rem 0.75rem;vertical-align:top">
+                    <span style="display:inline-flex;align-items:center;gap:0.35rem;background:{{ r.statusBg }};color:{{ r.statusFg }};border-radius:999px;padding:0.2rem 0.6rem;font-size:0.8rem;font-weight:600;white-space:nowrap"><span aria-hidden="true">{{ r.statusSymbol }}</span>{{ r.statusLabel }}</span>
+                  </td>
+                  <td style="padding:0.85rem 0.75rem;vertical-align:top">
+                    <sc-if value="{{ r.hasWarn }}" hint-placeholder-val="{{ false }}">
+                      <button type="button" onClick="{{ r.onExpand }}" aria-expanded="{{ r.expandedStr }}" style="display:inline-flex;align-items:center;gap:0.35rem;background:{{ r.warnBg }};color:{{ r.warnFg }};border:1px solid {{ r.warnFg }};border-radius:var(--ocs-radius-sm);padding:0.2rem 0.5rem;font-size:0.8rem;font-weight:600"><span aria-hidden="true">⚠</span>{{ r.warnLabel }}<span aria-hidden="true">{{ r.caret }}</span></button>
+                    </sc-if>
+                    <sc-if value="{{ r.clean }}" hint-placeholder-val="{{ false }}"><span style="font-size:0.82rem;color:var(--ocs-text-muted)">—</span></sc-if>
+                  </td>
+                </tr>
+                <sc-if value="{{ r.expanded }}" hint-placeholder-val="{{ false }}">
+                  <tr style="background:{{ r.rowBg }}">
+                    <td></td>
+                    <td colspan="7" style="padding:0 0.75rem 1rem">
+                      <div style="background:var(--ocs-page-bg);border:1px solid var(--ocs-border);border-radius:var(--ocs-radius-md);padding:0.9rem 1rem">
+                        <div style="font-weight:700;font-size:0.85rem;margin-bottom:0.5rem">Warnings — resolve on the source form before generating</div>
+                        <ul style="margin:0 0 0.75rem;padding-left:1.1rem;display:flex;flex-direction:column;gap:0.35rem">
+                          <sc-for list="{{ r.warnings }}" as="w" hint-placeholder-count="2">
+                            <li style="font-size:0.88rem"><span style="font-weight:700;color:{{ w.color }}">{{ w.tag }}:</span> {{ w.text }}</li>
+                          </sc-for>
+                        </ul>
+                        <div style="font-weight:700;font-size:0.85rem;margin-bottom:0.4rem;color:var(--ocs-text-secondary)">Sessions on this form</div>
+                        <div style="display:flex;flex-direction:column;gap:0.2rem">
+                          <sc-for list="{{ r.sessions }}" as="s" hint-placeholder-count="2">
+                            <div style="display:flex;justify-content:space-between;gap:1rem;font-size:0.85rem;border-bottom:1px dashed var(--ocs-border);padding:0.25rem 0"><span>{{ s.name }}</span><span style="font-family:var(--ocs-font-mono);color:var(--ocs-text-secondary);white-space:nowrap">{{ s.meta }}</span></div>
+                          </sc-for>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                </sc-if>
+              </tbody>
+            </sc-for>
+          </table>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ---------- LEDGER ---------- -->
+    <sc-if value="{{ isLedger }}" hint-placeholder-val="{{ false }}">
+      <div style="animation:ocsIn 0.25s ease">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.35rem">
+          <h1 style="font-family:var(--ocs-font-display);font-size:1.35rem;margin:0">Ledger</h1>
+          <span style="font-size:0.85rem;color:var(--ocs-text-muted)">{{ ledgerCount }} generated logs · {{ sentCount }} sent</span>
+        </div>
+        <p style="font-size:0.92rem;color:var(--ocs-text-secondary);margin:0 0 1rem;max-width:60ch">Every log this tool has generated. Mark a log as sent once you’ve emailed it to AOIC, then download the updated ledger to save your progress back to the shared file.</p>
+
+        <div style="display:flex;gap:0.6rem;flex-wrap:wrap;margin-bottom:1rem">
+          <button type="button" onClick="{{ downloadLedger }}" style="background:var(--ocs-btn-bg);color:var(--ocs-on-accent);border:none;border-radius:var(--ocs-radius-md);padding:0.6rem 1rem;font-weight:600;font-size:0.92rem;display:inline-flex;align-items:center;gap:0.4rem"><span aria-hidden="true">⭳</span>Download updated ledger</button>
+          <button type="button" onClick="{{ mergeLedger }}" style="background:transparent;color:var(--ocs-accent);border:1.5px solid var(--ocs-accent);border-radius:var(--ocs-radius-md);padding:0.6rem 1rem;font-weight:600;font-size:0.92rem;display:inline-flex;align-items:center;gap:0.4rem"><span aria-hidden="true">⤵</span>Merge another ledger…</button>
+        </div>
+
+        <div style="background:var(--ocs-card-bg);border:1px solid var(--ocs-border);border-radius:var(--ocs-radius-lg);box-shadow:0 1px 3px var(--ocs-shadow-card);overflow:auto">
+          <table style="width:100%;font-size:0.92rem;min-width:760px">
+            <thead>
+              <tr style="background:var(--ocs-code-bg);text-align:left">
+                <th style="padding:0.8rem 0.75rem;font-weight:700">Person</th>
+                <th style="padding:0.8rem 0.75rem;font-weight:700">Conference / Label</th>
+                <th style="padding:0.8rem 0.75rem;font-weight:700">Log file</th>
+                <th style="padding:0.8rem 0.75rem;font-weight:700;white-space:nowrap">Generated</th>
+                <th style="padding:0.8rem 0.75rem;font-weight:700">Sent</th>
+              </tr>
+            </thead>
+            <tbody>
+              <sc-for list="{{ ledgerRows }}" as="e" hint-placeholder-count="4">
+                <tr style="border-top:1px solid var(--ocs-border);background:{{ e.rowBg }}">
+                  <td style="padding:0.85rem 0.75rem;font-weight:600;white-space:nowrap">{{ e.person }}</td>
+                  <td style="padding:0.85rem 0.75rem;max-width:22rem">{{ e.label }}</td>
+                  <td style="padding:0.85rem 0.75rem;font-family:var(--ocs-font-mono);font-size:0.78rem;color:var(--ocs-code-fg);white-space:nowrap">{{ e.filename }}</td>
+                  <td style="padding:0.85rem 0.75rem;white-space:nowrap;font-size:0.85rem;color:var(--ocs-text-secondary)">{{ e.generatedOn }}</td>
+                  <td style="padding:0.85rem 0.75rem;white-space:nowrap">
+                    <button type="button" onClick="{{ e.onToggleSent }}" role="switch" aria-checked="{{ e.sentStr }}" style="display:inline-flex;align-items:center;gap:0.5rem;background:{{ e.sentBtnBg }};color:{{ e.sentBtnFg }};border:1px solid {{ e.sentBtnBorder }};border-radius:999px;padding:0.3rem 0.65rem;font-size:0.82rem;font-weight:600">
+                      <span aria-hidden="true">{{ e.sentSymbol }}</span>{{ e.sentLabel }}
+                    </button>
+                  </td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </sc-if>
+  </main>
+
+  <!-- ============ HELP DRAWER ============ -->
+  <sc-if value="{{ helpOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeHelp }}" style="position:fixed;inset:0;background:rgba(13,26,48,0.45);z-index:40;display:flex;justify-content:flex-end">
+      <div role="dialog" aria-modal="true" aria-label="Help" onClick="{{ stop }}" style="width:min(440px,100%);height:100%;background:var(--ocs-card-bg);border-left:1px solid var(--ocs-border);box-shadow:-4px 0 20px var(--ocs-shadow-card);overflow-y:auto;animation:ocsIn 0.2s ease">
+        <div style="position:sticky;top:0;background:var(--ocs-sb-bg);color:var(--ocs-sb-text);padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between">
+          <h2 style="margin:0;font-family:var(--ocs-font-display);font-size:1.1rem">Help</h2>
+          <button type="button" onClick="{{ closeHelp }}" aria-label="Close help" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);color:#fff;border-radius:8px;width:2rem;height:2rem;font-size:1.1rem;line-height:1">×</button>
+        </div>
+        <div style="padding:1.25rem">
+          <section style="margin-bottom:1.5rem">
+            <h3 style="font-size:0.95rem;margin:0 0 0.4rem;color:var(--ocs-navy)">What this tool does</h3>
+            <p style="font-size:0.9rem;color:var(--ocs-text-secondary);margin:0">It reads the Microsoft Forms export of staff training submissions and produces one AOIC-format log file per person. It tracks what’s been generated and sent in a ledger so nothing is done twice.</p>
+          </section>
+          <section style="margin-bottom:1.5rem">
+            <h3 style="font-size:0.95rem;margin:0 0 0.4rem;color:var(--ocs-navy)">Sync procedure (§8.5)</h3>
+            <ol style="font-size:0.9rem;color:var(--ocs-text-secondary);margin:0;padding-left:1.2rem;display:flex;flex-direction:column;gap:0.35rem">
+              <li>Download the latest ledger from the shared folder before you start.</li>
+              <li>Drop it alongside the Forms export on the landing screen.</li>
+              <li>Generate logs, then mark each as sent as you email them.</li>
+              <li>Click <strong>Download updated ledger</strong> and replace the shared copy.</li>
+            </ol>
+          </section>
+          <section style="margin-bottom:1.5rem">
+            <h3 style="font-size:0.95rem;margin:0 0 0.4rem;color:var(--ocs-navy)">Manual path — OCS-Pivot (§2.6)</h3>
+            <p style="font-size:0.9rem;color:var(--ocs-text-secondary);margin:0">If a submission can’t be generated automatically, open the OCS-Pivot workbook, use the AOIC template tab, and copy the session rows in by hand. Then add the entry to the ledger manually.</p>
+          </section>
+          <section>
+            <button type="button" onClick="{{ toggleDev }}" aria-expanded="{{ devStr }}" style="width:100%;text-align:left;background:var(--ocs-code-bg);border:1px solid var(--ocs-border);border-radius:var(--ocs-radius-md);padding:0.7rem 0.9rem;font-weight:600;font-size:0.9rem;display:flex;justify-content:space-between;align-items:center">Developer handoff notes <span aria-hidden="true">{{ devCaret }}</span></button>
+            <sc-if value="{{ devOpen }}" hint-placeholder-val="{{ false }}">
+              <div style="border:1px solid var(--ocs-border);border-top:none;border-radius:0 0 var(--ocs-radius-md) var(--ocs-radius-md);padding:0.9rem;font-size:0.82rem;color:var(--ocs-text-secondary);line-height:1.55">
+                <p style="margin:0 0 0.6rem"><strong>For Claude Code — implementing this front end:</strong></p>
+                <ul style="margin:0;padding-left:1.1rem;display:flex;flex-direction:column;gap:0.45rem">
+                  <li><strong>Tokens:</strong> use <span style="font-family:var(--ocs-font-mono)">ocs-theme.css</span> verbatim; do not hardcode hex. Dark mode = <span style="font-family:var(--ocs-font-mono)">html[data-ocs-mode]</span>, default follows OS. Persist the toggle + text-size in localStorage.</li>
+                  <li><strong>Text size:</strong> stepper sets <span style="font-family:var(--ocs-font-mono)">documentElement.style.fontSize</span> (100/115/130%); all type uses <span style="font-family:var(--ocs-font-mono)">rem</span> so browser zoom stays safe.</li>
+                  <li><strong>A11y:</strong> WCAG 2.1 AA. Status uses symbol + text + color (never color alone). Real <span style="font-family:var(--ocs-font-mono)">&lt;button&gt;</span>/<span style="font-family:var(--ocs-font-mono)">&lt;input&gt;</span>, visible focus rings, drop zone is keyboard-operable.</li>
+                  <li><strong>Locked (do not redesign):</strong> AOIC xlsx layout (§6), filename convention, ledger schema, processing rules. This UI only orchestrates them.</li>
+                  <li><strong>Parsing:</strong> one submission = one person’s form (Name / Conference / Date(s) + a session table of Session / Date / Credit Hours / Relias flag). Sum hours; carry per-session warnings.</li>
+                  <li><strong>No network:</strong> all file handling client-side. No login, accounts, or settings pages — initials are the only identity input.</li>
+                </ul>
+              </div>
+            </sc-if>
+          </section>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ TOAST ============ -->
+  <sc-if value="{{ toastShown }}" hint-placeholder-val="{{ false }}">
+    <div role="status" style="position:fixed;left:50%;bottom:1.5rem;transform:translateX(-50%);z-index:50;background:var(--ocs-sb-bg);color:var(--ocs-sb-text);padding:0.7rem 1.1rem;border-radius:var(--ocs-radius-md);box-shadow:0 4px 16px var(--ocs-shadow-btn-hover);font-size:0.9rem;font-weight:500;animation:ocsIn 0.2s ease">{{ toast }}</div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    view: 'landing', mode: 'system', fontScale: 1,
+    initials: '', helpOpen: false, devOpen: false, dragOver: false,
+    filterPerson: 'all', filterStatus: 'all',
+    expanded: {}, selected: {}, toast: '',
+    subs: this.seed(), ledger: this.seedLedger(),
+  };
+
+  today() { return '07/17/2026'; }
+
+  seed() {
+    return [
+      { id:'s1', person:'Christopher LeMay', last:'LeMay', label:'ACJI Webinar Series (multi-session)', dates:'1/9/26 – 6/9/26', status:'new',
+        sessions:[
+          {name:'ACJI Live Webinar — How to make 2026 your most productive year yet', date:'1/9/26', hours:1},
+          {name:'ACJI Live Webinar — How Shifting Culture Reduced Recidivism in Iowa', date:'1/9/26', hours:1},
+          {name:'APPA Webinar — Purpose-Built AI for Community Supervision', date:'3/13/26', hours:1},
+          {name:'ACJI Learn@Work — Making Motivational Interviewing Stick', date:'5/8/26', hours:1},
+          {name:'APPA Webinar — Reframing Justice-Involved Young Adults', date:'6/9/26', hours:1},
+        ],
+        warnings:[{level:'warn', text:'One session row has a blank credit-hour value — the log total may be short.'}] },
+      { id:'s2', person:'Angela Rivera', last:'Rivera', label:'TRI/NCSC AI Policy Consortium Series', dates:'5/14/26 – 5/20/26', status:'new',
+        sessions:[
+          {name:'AI in Legal Settings: Guardrails for Responsible Innovation', date:'5/20/26', hours:1},
+          {name:'AI in Legal Settings: Guardrails for Responsible Innovation', date:'5/20/26', hours:1},
+        ],
+        warnings:[
+          {level:'warn', text:'Two sessions look like duplicates (same title and date).'},
+          {level:'error', text:'A session date (5/14/26) has no matching title on the form.'},
+        ] },
+      { id:'s3', person:'Marcus Bell', last:'Bell', label:'The Justice Clearinghouse Webinars', dates:'4/21/26 – 6/2/26', status:'new',
+        sessions:[
+          {name:'Be the Leader You Needed — Not Just the One You Had', date:'4/21/26', hours:1},
+          {name:'It’s Not Over, Even When It’s Over', date:'6/2/26', hours:1},
+        ],
+        warnings:[{level:'warn', text:"Date '5.5.26' is ambiguous (May 5 or Mar 5?). Confirm before generating."}] },
+      { id:'s4', person:'Terrence Woods', last:'Woods', label:'ACJI Learn@Work Live Series', dates:'5/8/26', status:'new',
+        sessions:[{name:'Making Motivational Interviewing Stick', date:'5/8/26', hours:1}],
+        warnings:[{level:'error', text:'No staff initials found on this form. Initials are required on the generated log.'}] },
+      { id:'s5', person:'Sofia Delgado', last:'Delgado', label:'APPA Standards Meet Real-World Tech', dates:'4/30/26', status:'new',
+        sessions:[{name:"What's Working Across the Country", date:'4/30/26', hours:0.5}], warnings:[] },
+      { id:'s6', person:'Danielle Ortiz', last:'Ortiz', label:'APPA Leadership Series', dates:'4/9/26 – 5/5/26', status:'generated', generatedOn:'06/28/2026',
+        sessions:[
+          {name:'Quieting the Noise: Purpose-Built AI', date:'4/9/26', hours:1},
+          {name:'The Power of "NO": Setting Boundaries', date:'4/9/26', hours:1},
+          {name:'Leading Through Change', date:'5/5/26', hours:1},
+        ], warnings:[] },
+      { id:'s7', person:'Priya Nair', last:'Nair', label:'Relias — Motivational Interviewing', dates:'2/2/26 – 3/13/26', status:'generated', generatedOn:'07/02/2026',
+        sessions:[
+          {name:'MI Fundamentals', date:'2/2/26', hours:1},
+          {name:'MI in Practice', date:'2/20/26', hours:1},
+          {name:'MI Coaching', date:'3/6/26', hours:1},
+          {name:'MI Assessment', date:'3/13/26', hours:1},
+        ], warnings:[] },
+    ];
+  }
+
+  seedLedger() {
+    return [
+      { id:'l1', subId:'s6', person:'Danielle Ortiz', label:'APPA Leadership Series', filename:'Ortiz_Danielle__APPA-Leadership__2026-06-28.xlsx', generatedOn:'06/28/2026', sent:true, sentOn:'06/30/2026' },
+      { id:'l2', subId:'s7', person:'Priya Nair', label:'Relias — Motivational Interviewing', filename:'Nair_Priya__Relias-MI__2026-07-02.xlsx', generatedOn:'07/02/2026', sent:false },
+    ];
+  }
+
+  componentDidMount() {
+    try {
+      const m = localStorage.getItem('ocs-mode');
+      const f = localStorage.getItem('ocs-fontscale');
+      if (m === 'dark' || m === 'light') { this.applyMode(m); this.setState({ mode:m }); }
+      if (f) { const sc = parseFloat(f); this.applyFont(sc); this.setState({ fontScale: sc }); }
+    } catch (e) {}
+  }
+
+  applyMode(mode) {
+    const el = document.documentElement;
+    if (mode === 'light' || mode === 'dark') el.setAttribute('data-ocs-mode', mode);
+    else el.removeAttribute('data-ocs-mode');
+    try { localStorage.setItem('ocs-mode', mode); } catch (e) {}
+  }
+  applyFont(scale) {
+    document.documentElement.style.fontSize = Math.round(scale * 100) + '%';
+    try { localStorage.setItem('ocs-fontscale', String(scale)); } catch (e) {}
+  }
+
+  toast(msg) {
+    this.setState({ toast: msg });
+    clearTimeout(this._t);
+    this._t = setTimeout(() => this.setState({ toast: '' }), 3200);
+  }
+
+  fmtHours(h) { return h.toFixed(1); }
+
+  render_helpers() {} // noop
+
+  renderVals() {
+    const s = this.state;
+    const mode = s.mode;
+    const initialsOk = s.initials.trim().length >= 2;
+
+    // Font stepper
+    const scales = [{ sc:1, aria:'Normal text size' }, { sc:1.15, aria:'Larger text size' }, { sc:1.3, aria:'Largest text size' }];
+    const fontButtons = scales.map((x, i) => {
+      const active = Math.abs(s.fontScale - x.sc) < 0.001;
+      return {
+        aria: x.aria, size: (0.8 + i * 0.18) + 'rem',
+        pressed: active ? 'true' : 'false',
+        bg: active ? '#ffffff' : 'transparent',
+        fg: active ? 'var(--ocs-sb-bg)' : 'var(--ocs-sb-text)',
+        border: active ? '#ffffff' : 'rgba(255,255,255,0.28)',
+        onClick: () => { this.applyFont(x.sc); this.setState({ fontScale: x.sc }); },
+      };
+    });
+
+    // Theme
+    const isDark = mode === 'dark';
+    const toggleTheme = () => {
+      const next = isDark ? 'light' : 'dark';
+      this.applyMode(next); this.setState({ mode: next });
+    };
+
+    const setView = (v) => () => this.setState({ view: v });
+
+    const navTabs = [
+      { key:'summary', label:'Summary' },
+      { key:'preview', label:'Preview' },
+      { key:'ledger', label:'Ledger' },
+    ].map(t => {
+      const cur = s.view === t.key;
+      return { label:t.label, current: cur ? 'page' : 'false',
+        border: cur ? '#fff' : 'transparent',
+        fg: cur ? '#fff' : 'var(--ocs-sb-text-muted)',
+        onClick: setView(t.key) };
+    });
+
+    // Summary
+    const found = s.subs.length;
+    const newCount = s.subs.filter(x => x.status === 'new').length;
+    const genCount = s.subs.filter(x => x.status === 'generated').length;
+    const warnCount = s.subs.filter(x => x.warnings.length).length;
+
+    // Preview rows
+    let list = s.subs.slice();
+    if (s.filterPerson !== 'all') list = list.filter(x => x.id === s.filterPerson);
+    if (s.filterStatus !== 'all') list = list.filter(x => x.status === s.filterStatus);
+
+    const statusMeta = (x) => x.status === 'new'
+      ? { label:'New', symbol:'●', bg:'var(--ocs-status-neutral-bg)', fg:'var(--ocs-status-neutral)' }
+      : { label:'Already Generated (on ' + x.generatedOn + ')', symbol:'✓', bg:'var(--ocs-status-good-bg)', fg:'var(--ocs-status-good)' };
+
+    const rows = list.map(x => {
+      const hasErr = x.warnings.some(w => w.level === 'error');
+      const sm = statusMeta(x);
+      const wc = x.warnings.length;
+      const selectable = x.status === 'new';
+      return {
+        person:x.person, label:x.label, dates:x.dates, sessionCount:x.sessions.length,
+        hours:this.fmtHours(x.sessions.reduce((a,b)=>a+(b.hours||0),0)),
+        statusLabel:sm.label, statusSymbol:sm.symbol, statusBg:sm.bg, statusFg:sm.fg,
+        hasWarn: wc > 0, clean: wc === 0,
+        warnLabel: wc + (wc === 1 ? ' warning' : ' warnings'),
+        warnFg: hasErr ? 'var(--ocs-status-bad)' : 'var(--ocs-status-warn)',
+        warnBg: hasErr ? 'var(--ocs-status-bad-bg)' : 'var(--ocs-status-warn-bg)',
+        caret: s.expanded[x.id] ? '▴' : '▾',
+        expanded: !!s.expanded[x.id], expandedStr: s.expanded[x.id] ? 'true' : 'false',
+        onExpand: () => this.setState(st => ({ expanded: { ...st.expanded, [x.id]: !st.expanded[x.id] } })),
+        checked: !!s.selected[x.id],
+        selectAria: 'Select ' + x.person,
+        onToggle: () => { if (!selectable) return; this.setState(st => ({ selected: { ...st.selected, [x.id]: !st.selected[x.id] } })); },
+        rowBg: s.selected[x.id] ? 'var(--ocs-row-hover)' : 'var(--ocs-card-bg)',
+        warnings: x.warnings.map(w => ({
+          tag: w.level === 'error' ? 'Error' : 'Warning',
+          color: w.level === 'error' ? 'var(--ocs-status-bad)' : 'var(--ocs-status-warn)',
+          text: w.text,
+        })),
+        sessions: x.sessions.map(ss => ({ name: ss.name, meta: ss.date + ' · ' + this.fmtHours(ss.hours) + ' hr' })),
+      };
+    });
+
+    const selectedNew = s.subs.filter(x => x.status === 'new' && s.selected[x.id]);
+    const selectedCount = selectedNew.length;
+    const shownNew = list.filter(x => x.status === 'new');
+    const allChecked = shownNew.length > 0 && shownNew.every(x => s.selected[x.id]);
+
+    const peopleOptions = [{ value:'all', label:'All people' }].concat(
+      s.subs.map(x => ({ value:x.id, label:x.person })));
+
+    const doGenerate = (ids, label) => {
+      const now = this.today();
+      const newLedger = s.ledger.slice();
+      const subs = s.subs.map(x => {
+        if (ids.includes(x.id) && x.status === 'new') {
+          const fn = x.last + '_' + x.person.split(' ')[0] + '__' + x.label.replace(/[^A-Za-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,24) + '__2026-07-17.xlsx';
+          newLedger.push({ id:'l'+Date.now()+x.id, subId:x.id, person:x.person, label:x.label, filename:fn, generatedOn:now, sent:false });
+          return { ...x, status:'generated', generatedOn:now };
+        }
+        return x;
+      });
+      this.setState({ subs, ledger:newLedger, selected:{}, view:'ledger' });
+      this.toast(label);
+    };
+
+    const generateAll = () => { if (!initialsOk) return; const ids = s.subs.filter(x=>x.status==='new').map(x=>x.id); doGenerate(ids, ids.length + ' logs generated · initials ' + s.initials.toUpperCase()); };
+    const generateSelected = () => { if (!selectedCount) return; doGenerate(selectedNew.map(x=>x.id), selectedCount + ' selected logs generated'); };
+
+    // Ledger
+    const ledgerRows = s.ledger.map(e => ({
+      person:e.person, label:e.label, filename:e.filename, generatedOn:e.generatedOn,
+      rowBg: e.sent ? 'var(--ocs-row-tint-good)' : 'var(--ocs-card-bg)',
+      sentStr: e.sent ? 'true' : 'false',
+      sentLabel: e.sent ? 'Sent ' + (e.sentOn||'') : 'Mark as sent',
+      sentSymbol: e.sent ? '✓' : '○',
+      sentBtnBg: e.sent ? 'var(--ocs-status-good-bg)' : 'transparent',
+      sentBtnFg: e.sent ? 'var(--ocs-status-good)' : 'var(--ocs-text-secondary)',
+      sentBtnBorder: e.sent ? 'var(--ocs-status-good)' : 'var(--ocs-border-hover)',
+      onToggleSent: () => this.setState(st => ({ ledger: st.ledger.map(le => le.id===e.id ? { ...le, sent:!le.sent, sentOn: !le.sent ? this.today() : undefined } : le) })),
+    }));
+
+    const openPicker = () => this.fileRef && this.fileRef.click();
+
+    return {
+      loaded: s.view !== 'landing',
+      isLanding: s.view === 'landing', isSummary: s.view === 'summary',
+      isPreview: s.view === 'preview', isLedger: s.view === 'ledger',
+      fontButtons, navTabs,
+      themePressed: isDark ? 'true' : 'false', themeIcon: isDark ? '☀' : '☾',
+      themeLabel: isDark ? 'Light' : 'Dark', toggleTheme,
+      openHelp: () => this.setState({ helpOpen:true }),
+      closeHelp: () => this.setState({ helpOpen:false }),
+      helpOpen: s.helpOpen, stop: (e)=>e.stopPropagation(),
+      devOpen: s.devOpen, devStr: s.devOpen?'true':'false', devCaret: s.devOpen?'▴':'▾',
+      toggleDev: () => this.setState(st => ({ devOpen: !st.devOpen })),
+
+      // landing
+      dropBorder: s.dragOver ? 'var(--ocs-accent)' : 'var(--ocs-border-hover)',
+      setFileRef: (el) => { this.fileRef = el; },
+      openPicker, openPickerStop: (e)=>{ e.stopPropagation(); openPicker(); },
+      onFiles: () => this.setState({ view:'summary' }),
+      onDrop: (e)=>{ e.preventDefault(); this.setState({ view:'summary', dragOver:false }); },
+      onDragOver: (e)=>{ e.preventDefault(); if(!s.dragOver) this.setState({ dragOver:true }); },
+      onDragLeave: ()=> this.setState({ dragOver:false }),
+      onDropZoneKey: (e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openPicker(); } },
+      loadSample: () => this.setState({ view:'summary' }),
+
+      // summary
+      summary: { found, new: newCount, generated: genCount, warnings: warnCount },
+      initials: s.initials,
+      onInitials: (e)=> this.setState({ initials: e.target.value.toUpperCase() }),
+      genDisabled: !initialsOk,
+      genBg: initialsOk ? 'var(--ocs-btn-bg)' : 'var(--ocs-status-neutral)',
+      genOpacity: initialsOk ? '1' : '0.6',
+      generateAll, goPreview: setView('preview'),
+
+      // preview
+      rowCount: rows.length, rows,
+      filterPerson: s.filterPerson, filterStatus: s.filterStatus, peopleOptions,
+      onFilterPerson: (e)=> this.setState({ filterPerson: e.target.value }),
+      onFilterStatus: (e)=> this.setState({ filterStatus: e.target.value }),
+      allChecked, toggleAll: ()=> this.setState(st => { const sel={...st.selected}; const on=!allChecked; shownNew.forEach(x=>{ sel[x.id]=on; }); return { selected: sel }; }),
+      selectedCount, selDisabled: selectedCount===0,
+      selBg: selectedCount ? 'var(--ocs-btn-bg)' : 'var(--ocs-status-neutral)',
+      selOpacity: selectedCount ? '1':'0.6',
+      generateSelected,
+
+      // ledger
+      ledgerRows, ledgerCount: s.ledger.length, sentCount: s.ledger.filter(e=>e.sent).length,
+      downloadLedger: ()=> this.toast('Updated ledger downloaded (prototype) — replace the shared copy.'),
+      mergeLedger: ()=> this.toast('Merge: choose a second ledger file to combine (prototype).'),
+
+      toast: s.toast, toastShown: !!s.toast,
+    };
+  }
+}
+</script>
+</body>
+</html>

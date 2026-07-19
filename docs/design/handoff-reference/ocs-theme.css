@@ -1,0 +1,236 @@
+/* ============================================================================
+   OCS Design System — canonical token artifact
+   ============================================================================
+   Version:    theme-v1.0.0 (tag namespace `theme-vX.Y.Z`; additions are minor,
+               renames/removals are major and require a coordinated re-vendor)
+   Authority:  docs/design/ocs-design-theme-spec.md (LD-THEME-01..08)
+   Provenance: lifted verbatim from the shipped ileps F30/F31 token stylesheet
+               (ileps@89ec587, app/www/ocs.css), renamespaced under `--ocs-`.
+               Values marked [NEW] did not ship in ileps and are proposed by
+               this artifact per spec §3 "Codify, don't invent".
+   Vendoring:  citizens vendor a pinned copy of this file (Hybrid convention,
+               LD-THEME-07) and record the pinned version in this header line:
+               PINNED: theme-v1.0.0 @ 64eed43
+   Citizen:    cope-processor-flask. Local deltas from the canonical artifact,
+               all confined to the per-app accent slot (§4.3):
+               - --ocs-accent → var(--ocs-accent-violet) (ratified 2026-07-01)
+               - --ocs-accent-fill → violet. White label passes in light
+                 (7.07:1) but fails in dark (#b39ddb under white = 2.40:1),
+                 so dark --ocs-on-accent → #0f141c (7.71:1 on fill) — the
+                 ileps --btn-bg precedent.
+               - --ocs-accent-fill-hover added (light #7a5cb5 = 5.22:1 under
+                 white; dark #c7b6e4 = 9.88:1 under #0f141c).
+               - --ocs-btn-bg/-hover repointed at the accent fill: this
+                 citizen's only button fill IS the accent fill.
+               Evidence: scripts/ocs-theme-check.py output pasted in the PR.
+   Fonts:      family tokens only. Font binaries are vendored per citizen,
+               self-hosted/base64 (no external font URLs — ecosystem rule).
+               The OFL sources live at OCS-Ecosystem/UI/; ileps's
+               scripts/build-fonts-css.sh is the reference embedding pattern.
+   Modes:      light is :root; dark applies via `prefers-color-scheme` by
+               default (LD-THEME-04) and can be forced either way with
+               html[data-ocs-mode="dark"|"light"] (in-app toggles set this;
+               the system preference is only the initial state).
+   ========================================================================== */
+
+:root {
+  /* --- Typography (families lifted from shipped ileps C2 role map) --- */
+  --ocs-font-body:    'Source Sans 3', system-ui, sans-serif;
+  --ocs-font-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  --ocs-font-mono:    'Fira Code', ui-monospace, monospace;
+
+  /* --- Page surface tones --- */
+  --ocs-page-bg:        #f1f4f9;
+  --ocs-card-bg:        #ffffff;
+  --ocs-card-bg-hover:  #fafcff;   /* raised surface */
+
+  /* --- Borders --- */
+  --ocs-border:         #e1e6ef;
+  --ocs-border-hover:   #c9d2e2;
+
+  /* --- Brand anchor + palette (the OCS-flavored accent family) --- */
+  --ocs-navy:       #0d3a72;
+  --ocs-navy-soft:  #1d4f8f;
+  --ocs-gold:       #b88a30;
+  --ocs-teal:       #1f7a8c;
+  --ocs-red:        #a52423;
+  --ocs-green:      #14672e;
+  --ocs-slate:      #5b6b80;
+  --ocs-cream:      #fff3b0;
+
+  /* --- Type tones --- */
+  --ocs-text-primary:   #1d2330;
+  --ocs-text-secondary: #5b6b80;
+  --ocs-text-muted:     #646d80;  /* QA: was #8a93a5, 3.09:1 on card — fails AA */
+
+  /* --- Sidebar / brand surface (inverted from page) --- */
+  --ocs-sb-bg:          #0d3a72;
+  --ocs-sb-bg-hover:    #1d4f8f;
+  --ocs-sb-text:        #e7eef9;
+  --ocs-sb-text-muted:  #b4c2db;  /* QA: was #97a8c4, 3.39:1 on sb-hover — fails AA */
+  --ocs-sb-border:      rgba(255,255,255,0.10);
+
+  /* --- Semantic status (AA in both modes — LD-F30-04) --- */
+  --ocs-status-good:       #14672e;
+  --ocs-status-good-bg:    rgba(20, 103, 46, 0.12);
+  --ocs-status-warn:       #886519;                    /* [NEW] gold family; value = shipped ileps --gold-text QA shade */
+  --ocs-status-warn-bg:    rgba(184, 138, 48, 0.12);   /* [NEW] tint follows the good/bad tint pattern */
+  --ocs-status-bad:        #a52423;
+  --ocs-status-bad-bg:     rgba(165, 36, 35, 0.12);
+  --ocs-status-neutral:    #5b6b80;
+  --ocs-status-neutral-bg: rgba(91, 107, 128, 0.12);
+
+  /* --- Single-use surface tones --- */
+  --ocs-row-hover:      #f7f9fc;
+  --ocs-code-bg:        #eef2f8;
+  --ocs-code-fg:        #0d3a72;
+  --ocs-btn-bg:         var(--ocs-accent-fill);        /* cope: button fill IS the accent fill */
+  --ocs-btn-bg-hover:   var(--ocs-accent-fill-hover);
+  --ocs-gold-text:      #886519;   /* QA: gold-as-text needs a darker shade in light (#b88a30 = 2.69:1) */
+  --ocs-row-tint-good:    #eaf5ec;
+  --ocs-row-tint-bad:     #fcecec;
+  --ocs-row-tint-neutral: #f5f3ec;
+  --ocs-shadow-card:      rgba(13, 58, 114, 0.08);
+  --ocs-shadow-btn:       rgba(13, 58, 114, 0.2);
+  --ocs-shadow-btn-hover: rgba(13, 58, 114, 0.3);
+
+  /* --- Structural constants [NEW] (values observed in shipped ileps
+         component rules; codified here so the family reads as one) --- */
+  --ocs-radius-sm: 4px;    /* code chips, small tags        */
+  --ocs-radius-md: 10px;   /* inputs, buttons               */
+  --ocs-radius-lg: 16px;   /* cards, panels                 */
+  --ocs-focus-ring-width: 2px;
+  --ocs-focus-ring: var(--ocs-focus-ring-width) solid var(--ocs-accent);
+  --ocs-space-1: 4px;      /* [NEW] spacing scale — proposed */
+  --ocs-space-2: 8px;
+  --ocs-space-3: 12px;
+  --ocs-space-4: 16px;
+  --ocs-space-5: 24px;
+  --ocs-space-6: 32px;
+
+  /* --- Per-app accent slot (§4.3) — RATIFIED by Marty 2026-07-01 ------
+     Each citizen overrides --ocs-accent in its own vendored copy or a
+     one-rule companion file. Accents color identity moments ONLY (app
+     name treatment, primary button, focus states); they never recolor
+     status semantics and never touch the seal.
+       ileps ................ var(--ocs-navy)         #0d3a72 / #5e8fcc (flagship)
+       staff-directory ...... var(--ocs-teal)         #1f7a8c / #4fa8bc
+       training-scheduler ... var(--ocs-gold-text)    #886519 / #d4a94c
+       cope-processor-flask . var(--ocs-accent-violet) #66489c / #b39ddb [NEW]
+     Evidence: docs/design/ocs-theme-check.py — AA both modes, pairwise
+     CIEDE2000 >= 16.6 (bar 10). Known caveat, accepted at ratification:
+     gold/teal grayscale gap is thin in light mode (0.146 vs 0.161).    */
+  --ocs-accent:      var(--ocs-accent-violet);  /* cope-processor-flask (ratified 2026-07-01) */
+  --ocs-accent-fill: var(--ocs-accent-violet);  /* white label on violet fill: 7.07:1 light */
+  --ocs-accent-fill-hover: #7a5cb5;             /* white label on hover fill: 5.22:1 light */
+  --ocs-on-accent:   #ffffff;             /* text color on accent-fill */
+  --ocs-accent-violet: #66489c;           /* [NEW] cope-processor-flask accent — ratified 2026-07-01 */
+}
+
+/* === Dark palette (values verbatim from shipped ileps F31-T2 block) ======
+   Same custom-property contract — components never know which mode they are
+   in; only the variables change. The sidebar keeps its navy identity.
+   Accents are lightened so text-on-dark passes WCAG AA. */
+
+/* System preference (initial state, LD-THEME-04) — unless forced light */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-ocs-mode="light"]) {
+    --ocs-page-bg:        #0f141c;
+    --ocs-card-bg:        #161d29;
+    --ocs-card-bg-hover:  #1b2433;
+    --ocs-border:         #2a3447;
+    --ocs-border-hover:   #3d4b66;
+    --ocs-navy:           #5e8fcc;
+    --ocs-navy-soft:      #7aa7e0;
+    --ocs-gold:           #d4a94c;
+    --ocs-teal:           #4fa8bc;
+    --ocs-red:            #e06c6a;
+    --ocs-green:          #5cb87a;
+    --ocs-slate:          #8fa0b8;
+    --ocs-cream:          #3a3320;
+    --ocs-text-primary:   #e6edf3;
+    --ocs-text-secondary: #a9b6c9;
+    --ocs-text-muted:     #8794ab;  /* QA: was #76839a, 4.42:1 on card — fails AA */
+    --ocs-sb-bg:          #0b2c56;
+    --ocs-sb-bg-hover:    #16406f;
+    --ocs-status-good:       #5cb87a;
+    --ocs-status-good-bg:    rgba(92, 184, 122, 0.16);
+    --ocs-status-warn:       #d4a94c;                   /* [NEW] */
+    --ocs-status-warn-bg:    rgba(212, 169, 76, 0.16);  /* [NEW] */
+    --ocs-status-bad:        #ec8482;  /* QA: was #e06c6a, 4.25:1 on tint — fails AA */
+    --ocs-status-bad-bg:     rgba(224, 108, 106, 0.16);
+    --ocs-status-neutral:    #8fa0b8;
+    --ocs-status-neutral-bg: rgba(143, 160, 184, 0.16);
+    --ocs-row-hover:      #1b2433;
+    --ocs-code-bg:        #1f2937;
+    --ocs-code-fg:        #7aa7e0;  /* QA: dark navy on dark code-bg was 4.39:1 */
+    --ocs-btn-bg:         var(--ocs-accent-fill);  /* cope: button fill IS the accent fill */
+    --ocs-btn-bg-hover:   var(--ocs-accent-fill-hover);
+    --ocs-gold-text:      #d4a94c;
+    --ocs-row-tint-good:    #1f2b22;
+    --ocs-row-tint-bad:     #2b1d1d;
+    --ocs-row-tint-neutral: #2b2620;
+    --ocs-shadow-card:      rgba(0, 0, 0, 0.45);
+    --ocs-shadow-btn:       rgba(0, 0, 0, 0.35);
+    --ocs-shadow-btn-hover: rgba(0, 0, 0, 0.5);
+    --ocs-accent-violet:    #b39ddb;  /* [NEW] ratified 2026-07-01 */
+    /* cope-processor-flask dark accent-slot deltas — white on #b39ddb is
+       2.40:1 (fails AA), so the label goes dark: #0f141c on fill = 7.71:1 */
+    --ocs-accent-fill:       var(--ocs-accent-violet);
+    --ocs-accent-fill-hover: #c7b6e4;  /* #0f141c label on hover = 9.88:1 */
+    --ocs-on-accent:         #0f141c;
+  }
+}
+
+/* Forced dark (in-app toggle override) — identical value set */
+html[data-ocs-mode="dark"] {
+  --ocs-page-bg:        #0f141c;
+  --ocs-card-bg:        #161d29;
+  --ocs-card-bg-hover:  #1b2433;
+  --ocs-border:         #2a3447;
+  --ocs-border-hover:   #3d4b66;
+  --ocs-navy:           #5e8fcc;
+  --ocs-navy-soft:      #7aa7e0;
+  --ocs-gold:           #d4a94c;
+  --ocs-teal:           #4fa8bc;
+  --ocs-red:            #e06c6a;
+  --ocs-green:          #5cb87a;
+  --ocs-slate:          #8fa0b8;
+  --ocs-cream:          #3a3320;
+  --ocs-text-primary:   #e6edf3;
+  --ocs-text-secondary: #a9b6c9;
+  --ocs-text-muted:     #8794ab;
+  --ocs-sb-bg:          #0b2c56;
+  --ocs-sb-bg-hover:    #16406f;
+  --ocs-status-good:       #5cb87a;
+  --ocs-status-good-bg:    rgba(92, 184, 122, 0.16);
+  --ocs-status-warn:       #d4a94c;
+  --ocs-status-warn-bg:    rgba(212, 169, 76, 0.16);
+  --ocs-status-bad:        #ec8482;
+  --ocs-status-bad-bg:     rgba(224, 108, 106, 0.16);
+  --ocs-status-neutral:    #8fa0b8;
+  --ocs-status-neutral-bg: rgba(143, 160, 184, 0.16);
+  --ocs-row-hover:      #1b2433;
+  --ocs-code-bg:        #1f2937;
+  --ocs-code-fg:        #7aa7e0;
+  --ocs-btn-bg:         var(--ocs-accent-fill);  /* cope: button fill IS the accent fill */
+  --ocs-btn-bg-hover:   var(--ocs-accent-fill-hover);
+  --ocs-gold-text:      #d4a94c;
+  --ocs-row-tint-good:    #1f2b22;
+  --ocs-row-tint-bad:     #2b1d1d;
+  --ocs-row-tint-neutral: #2b2620;
+  --ocs-shadow-card:      rgba(0, 0, 0, 0.45);
+  --ocs-shadow-btn:       rgba(0, 0, 0, 0.35);
+  --ocs-shadow-btn-hover: rgba(0, 0, 0, 0.5);
+  --ocs-accent-violet:    #b39ddb;
+  /* cope-processor-flask dark accent-slot deltas (kept in sync with the
+     @media block above — identical value set) */
+  --ocs-accent-fill:       var(--ocs-accent-violet);
+  --ocs-accent-fill-hover: #c7b6e4;
+  --ocs-on-accent:         #0f141c;
+}
+
+/* Reduced motion (§8): consumers must gate login animations behind this. */
+@media (prefers-reduced-motion: reduce) {
+  :root { --ocs-motion: 0; }
+}
