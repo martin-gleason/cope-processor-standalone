@@ -1,0 +1,47 @@
+/* ============================================================================
+   theme-override.css — this citizen's local delta on top of the vendored
+   ocs-theme.css (Vendoring convention, ocs-theme.css header comment: citizens
+   vendor a pinned copy and confine local deltas to the per-app accent slot,
+   §4.3, plus — per spec §9.1's explicit lock for this app — the font-family
+   tokens).
+   ============================================================================
+   cope-processor-standalone deltas from the vendored artifact:
+   - --ocs-accent / --ocs-accent-fill -> spec §9.1 navy #1a365d (light) /
+     light-blue #d5e8f0 (dark), replacing the base file's currently-vendored
+     cope-processor-flask violet (#66489c / #b39ddb).
+   - --ocs-font-body / --ocs-font-display / --ocs-font-mono -> Noto Sans /
+     system-ui stack, replacing the base file's Source Sans 3 / Space
+     Grotesk / Fira Code stack. No webfont fetches (system-font fallbacks
+     only) — required, this app runs offline over file://.
+   Loaded after ocs-theme.css so these rules win on cascade.
+   ========================================================================== */
+
+:root {
+  --ocs-font-body: 'Noto Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --ocs-font-display: 'Noto Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --ocs-font-mono: 'Noto Sans Mono', ui-monospace, 'Cascadia Code', 'Segoe UI Mono', monospace;
+
+  /* Light mode: navy fill, white label — 1a365d under white is well over 7:1. */
+  --ocs-accent: #1a365d;
+  --ocs-accent-fill: #1a365d;
+  --ocs-accent-fill-hover: #234a7d;
+  --ocs-on-accent: #ffffff;
+}
+
+/* Dark mode: light-blue fill needs a dark label to stay AA (mirrors the base
+   file's own light-fill/dark-label pattern for its violet dark accent). */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-ocs-mode="light"]) {
+    --ocs-accent: #d5e8f0;
+    --ocs-accent-fill: #d5e8f0;
+    --ocs-accent-fill-hover: #bcd9e6;
+    --ocs-on-accent: #0f141c;
+  }
+}
+
+html[data-ocs-mode="dark"] {
+  --ocs-accent: #d5e8f0;
+  --ocs-accent-fill: #d5e8f0;
+  --ocs-accent-fill-hover: #bcd9e6;
+  --ocs-on-accent: #0f141c;
+}
