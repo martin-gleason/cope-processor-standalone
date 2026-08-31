@@ -24,6 +24,7 @@ The spec sets intention. The plan defines the hooks. This file governs how the a
 
 ```markdown
 @docs/conventions.md
+@docs/conventions-local.md
 ```
 
 Hybrid model: this repo vendors its own pinned `docs/conventions.md` rather than reaching into a parent workspace — it must stay independently viable if cloned alone (no OCS-Ecosystem monorepo parent exists for this citizen).
